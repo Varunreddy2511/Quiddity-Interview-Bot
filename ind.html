@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Prep Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.5.1/mammoth.browser.min.js"></script>
+    <!-- Chosen Palette: Indigo & Purple -->
+    <!-- Application Structure Plan: A multi-step wizard interface is chosen to guide the user sequentially through the process: 1. JD Input, 2. Resume Input, 3. Live Interview, 4. Final Report. This task-oriented flow prevents overwhelming the user by presenting only one clear action at a time. It's more intuitive for a process-driven tool like an interview simulation than a dashboard. The final step reveals the comprehensive report, providing a clear culmination of the process. -->
+    <!-- Visualization & Content Choices: The primary 'visualization' is the chat interface itself, which organizes the interview chronologically. The final report uses structured HTML (headings, lists, scorecards) to organize the quantitative and qualitative analysis from the AI. Goal: Inform/Analyze -> Presentation: Score display, summary text, and structured lists -> Interaction: User reads the final analysis and can download a full PDF report. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+        }
+        .chat-bubble-ai {
+            background-color: #eef2ff; /* indigo-50 */
+            color: #1e293b; /* slate-800 */
+            align-self: flex-start;
+        }
+        .chat-bubble-user {
+            background-color: #6366f1; /* indigo-500 */
+            color: white;
+            align-self: flex-end;
+        }
+        .hidden-section {
+            display: none;
+        }
+        textarea {
+            resize: vertical;
+        }
+        .step-icon-active {
+             background-color: #6366f1; /* indigo-500 */
+             color: white;
+        }
+        .step-icon-inactive {
+             background-color: #f1f5f9; /* slate-100 */
+             color: #64748b; /* slate-500 */
+        }
+        .step-icon-completed {
+            background-color: #22c55e; /* green-500 */
+            color: white;
+        }
+        .step-heading-active {
+            color: #1e293b; /* slate-800 */
+        }
+        .step-heading-inactive {
+            color: #475569; /* slate-600 */
+        }
+        .step-subtext-active {
+           color: #475569; /* slate-600 */
+        }
+        .step-subtext-inactive {
+            color: #94a3b8; /* slate-400 */
+        }
+        .tab-active {
+            border-color: #6366f1; /* indigo-500 */
+            color: #6366f1; /* indigo-600 */
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #64748b; /* slate-500 */
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
+
+    <div class="container mx-auto max-w-screen-xl p-4 sm:p-6 md:p-8">
+        <header class="flex justify-between items-center mb-4">
+            <div>
+                <img src="logo.png" alt="Quiddity Infotech Logo" class="h-20">
+            </div>
+            <div id="candidate-name-container" class="hidden">
+                <p id="candidate-name-display" class="text-slate-700 font-semibold text-lg"></p>
+            </div>
+        </header>
+
+        <div class="w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col md:grid md:grid-cols-12">
+            <!-- Left/Top Nav -->
+            <nav class="w-full md:col-span-4 lg:col-span-3 p-0 md:p-6 md:sm:p-8 bg-slate-50/70 border-b md:border-b-0 md:border-r border-slate-200">
+                <!-- Mobile Nav (Horizontal) -->
+                 <div class="flex md:hidden flex-row justify-around items-start text-center p-4">
+                     <!-- Step 1 Mobile -->
+                    <div class="flex-1 flex flex-col items-center space-y-2">
+                        <div id="step-1-icon-mobile" class="w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+                        <h3 id="step-1-heading-mobile" class="font-bold text-xs">Job Description</h3>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-slate-200 mt-5"></div>
+                     <!-- Step 2 Mobile -->
+                     <div class="flex-1 flex flex-col items-center space-y-2">
+                        <div id="step-2-icon-mobile" class="w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg></div>
+                        <h3 id="step-2-heading-mobile" class="font-bold text-xs">Resume Upload</h3>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-slate-200 mt-5"></div>
+                     <!-- Step 3 Mobile -->
+                     <div class="flex-1 flex flex-col items-center space-y-2">
+                        <div id="step-3-icon-mobile" class="w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg></div>
+                        <h3 id="step-3-heading-mobile" class="font-bold text-xs">Interview Bot</h3>
+                    </div>
+                     <div class="flex-1 h-0.5 bg-slate-200 mt-5"></div>
+                     <!-- Step 4 Mobile -->
+                     <div class="flex-1 flex flex-col items-center space-y-2">
+                        <div id="step-4-icon-mobile" class="w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
+                        <h3 id="step-4-heading-mobile" class="font-bold text-xs">Interview Result</h3>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav (Vertical) -->
+                <div class="hidden md:flex flex-col h-full space-y-6">
+                    <!-- Step 1 -->
+                    <div id="step-1-nav" class="flex items-center space-x-4">
+                        <div id="step-1-icon" class="step-icon-active w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <div id="step-1-text">
+                            <h3 id="step-1-heading" class="font-bold step-heading-active">Job Description</h3>
+                            <p id="step-1-subtext" class="text-sm step-subtext-active">Provide job details</p>
+                        </div>
+                    </div>
+                     <!-- Step 2 -->
+                    <div id="step-2-nav" class="flex items-center space-x-4">
+                        <div id="step-2-icon" class="step-icon-inactive w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        </div>
+                        <div id="step-2-text">
+                            <h3 id="step-2-heading" class="font-bold step-heading-inactive">Resume Upload</h3>
+                            <p id="step-2-subtext" class="text-sm step-subtext-inactive">Add your resume</p>
+                        </div>
+                    </div>
+                     <!-- Step 3 -->
+                    <div id="step-3-nav" class="flex items-center space-x-4">
+                       <div id="step-3-icon" class="step-icon-inactive w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                        </div>
+                        <div id="step-3-text">
+                            <h3 id="step-3-heading" class="font-bold step-heading-inactive">Interview Bot</h3>
+                            <p id="step-3-subtext" class="text-sm step-subtext-inactive">Practice with AI</p>
+                        </div>
+                    </div>
+                     <!-- Step 4 -->
+                    <div id="step-4-nav" class="flex items-center space-x-4">
+                         <div id="step-4-icon" class="step-icon-inactive w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        </div>
+                        <div id="step-4-text">
+                            <h3 id="step-4-heading" class="font-bold step-heading-inactive">Interview Result</h3>
+                            <p id="step-4-subtext" class="text-sm step-subtext-inactive">Get detailed feedback</p>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Right Content -->
+            <main class="md:col-span-8 lg:col-span-9 p-6 sm:p-8">
+                <!-- Step 1: Job Description -->
+                <section id="step-1-jd">
+                    <h2 class="text-3xl font-bold mb-1 text-slate-800 text-center">Job Description</h2>
+                    <p class="text-slate-500 mb-6 text-center">Provide the Job Description by uploading a file or pasting the text.</p>
+                    
+                    <div class="mb-4 border-b border-slate-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button id="jd-upload-tab" class="tab-active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Upload File</button>
+                            <button id="jd-paste-tab" class="tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Paste Text</button>
+                        </nav>
+                    </div>
+
+                    <div id="jd-upload-panel">
+                        <div id="jd-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md cursor-pointer hover:border-indigo-500 transition-colors">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                <div class="flex text-sm text-slate-600"><label for="jd-file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"><span>Upload a file</span><input id="jd-file-upload" type="file" class="sr-only" accept=".txt,.pdf,.doc,.docx"></label><p class="pl-1">or drag and drop</p></div>
+                                <p class="text-xs text-slate-500">TXT, PDF, DOC, DOCX up to 2MB</p>
+                            </div>
+                        </div>
+                        <div id="jd-file-display" class="hidden mt-2 text-sm text-slate-700 font-medium"></div>
+                    </div>
+                    <div id="jd-paste-panel" class="hidden">
+                        <textarea id="job-description-paste" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white" rows="10" placeholder="e.g., Senior Software Engineer with 8 years of experience..."></textarea>
+                    </div>
+                    <textarea id="job-description" class="hidden"></textarea>
+                    
+                    <button id="submit-jd-btn" class="mt-6 w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition duration-200 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed">Next: Add Your Resume →</button>
+                </section>
+
+                <!-- Step 2: Resume -->
+                <section id="step-2-resume" class="hidden-section">
+                    <h2 class="text-3xl font-bold mb-1 text-slate-800 text-center">Resume Upload</h2>
+                    <p class="text-slate-500 mb-6 text-center">Provide your resume by uploading a file or pasting the text.</p>
+                     
+                    <div class="mb-4 border-b border-slate-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button id="resume-upload-tab" class="tab-active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Upload File</button>
+                            <button id="resume-paste-tab" class="tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Paste Text</button>
+                        </nav>
+                    </div>
+
+                    <div id="resume-upload-panel">
+                         <div id="resume-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md cursor-pointer hover:border-indigo-500 transition-colors">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                <div class="flex text-sm text-slate-600"><label for="resume-file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"><span>Upload a file</span><input id="resume-file-upload" type="file" class="sr-only" accept=".txt,.pdf,.doc,.docx"></label><p class="pl-1">or drag and drop</p></div>
+                                <p class="text-xs text-slate-500">TXT, PDF, DOC, DOCX up to 2MB</p>
+                            </div>
+                        </div>
+                        <div id="resume-file-display" class="hidden mt-2 text-sm text-slate-700 font-medium"></div>
+                    </div>
+                     <div id="resume-paste-panel" class="hidden">
+                        <textarea id="resume-paste" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white" rows="15" placeholder="e.g., John Doe - Software Developer..."></textarea>
+                     </div>
+                    <textarea id="resume" class="hidden"></textarea>
+                    
+                    <button id="start-interview-btn" class="mt-6 w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition duration-200 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed">Start Interview</button>
+                </section>
+
+                <!-- Step 3: Chat Interview -->
+                <section id="step-3-interview" class="hidden-section">
+                    <h2 class="text-3xl font-bold mb-1 text-slate-800 text-center">Quiddity Interview Bot</h2>
+                    <p class="text-slate-500 mb-4 text-center">The interview is in progress. Answer the questions to the best of your ability. Good luck!</p>
+                    <div id="chat-window" class="h-96 border border-slate-200 rounded-lg p-4 flex flex-col space-y-4 overflow-y-auto bg-slate-50">
+                        <!-- Chat messages will be appended here -->
+                    </div>
+                    <div id="chat-input-container" class="mt-4 flex space-x-2">
+                        <input type="text" id="chat-input" class="flex-1 w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="Type your answer...">
+                        <button id="send-btn" class="bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition duration-200">Send</button>
+                    </div>
+                     <div id="loading-indicator" class="mt-4 text-center text-slate-500 hidden-section">
+                        <p>AI is thinking...</p>
+                    </div>
+                     <button id="end-interview-btn" class="mt-4 w-full bg-red-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-600 transition duration-200 hidden-section">End Interview & Get Report</button>
+                </section>
+
+                <!-- Step 4: Report -->
+                <section id="step-4-report" class="hidden-section">
+                    <h2 class="text-3xl font-bold mb-1 text-slate-800">Performance Report</h2>
+                    <p class="text-slate-500 mb-6">Here is a breakdown of your performance during the interview.</p>
+                    
+                    <div id="report-loading" class="text-center py-10">
+                        <p class="text-slate-600">Generating your detailed report, please wait...</p>
+                    </div>
+
+                    <div id="full-report-container">
+                        <div id="score-summary-section" class="hidden-section mb-6">
+                            <div class="score-visual text-center mb-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                                <h3 class="text-lg font-semibold text-slate-700">Overall Score</h3>
+                                <p class="text-6xl font-bold text-indigo-600"><span id="total-score"></span>/100</p>
+                                <div class="flex justify-center space-x-6 mt-2 text-slate-500">
+                                    <p>Technical Skills: <span id="technical-score" class="font-semibold text-slate-700"></span>/70</p>
+                                    <p>Communication: <span id="communication-score" class="font-semibold text-slate-700"></span>/30</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">Brief Summary</h3>
+                                <p id="brief-summary" class="text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-200"></p>
+                            </div>
+                            <hr class="my-6 border-slate-200">
+                        </div>
+                        
+                        <div id="report-content" class="space-y-6">
+                            <!-- Detailed report will be populated here -->
+                        </div>
+                    </div>
+
+                     <button id="download-report-pdf-btn" class="hidden-section mt-8 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 disabled:bg-slate-400">Download Full Report (PDF)</button>
+                     <button id="start-again-btn" class="mt-4 w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-3 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition duration-200">Start a New Interview</button>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const steps = ['step-1-jd', 'step-2-resume', 'step-3-interview', 'step-4-report'];
+            
+            // Main textareas (hidden)
+            const jdTextarea = document.getElementById('job-description');
+            const resumeTextarea = document.getElementById('resume');
+
+            // Visible textareas for pasting
+            const jdPasteTextarea = document.getElementById('job-description-paste');
+            const resumePasteTextarea = document.getElementById('resume-paste');
+            
+            const submitJdBtn = document.getElementById('submit-jd-btn');
+            const startInterviewBtn = document.getElementById('start-interview-btn');
+            const sendBtn = document.getElementById('send-btn');
+            const chatInput = document.getElementById('chat-input');
+            const chatWindow = document.getElementById('chat-window');
+            const endInterviewBtn = document.getElementById('end-interview-btn');
+            const startAgainBtn = document.getElementById('start-again-btn');
+            const chatInputContainer = document.getElementById('chat-input-container');
+            const downloadReportPdfBtn = document.getElementById('download-report-pdf-btn');
+            const candidateNameContainer = document.getElementById('candidate-name-container');
+            const candidateNameDisplay = document.getElementById('candidate-name-display');
+
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const reportLoading = document.getElementById('report-loading');
+            const reportContent = document.getElementById('report-content');
+            const scoreSummarySection = document.getElementById('score-summary-section');
+
+            let reportDataGlobal = null;
+            let conversationHistory = [];
+            const apiKey = "";
+            //const apiKey = "AIzaSyDwaM04UEdQ6RZVUwHq7nL91M6PXXd-C9A"; // Leave empty, will be handled by the environment
+
+            function navigateToStep(stepIndex) {
+                // Hide/show main content sections
+                steps.forEach((stepId, index) => {
+                    document.getElementById(stepId).classList.toggle('hidden-section', index !== stepIndex);
+                });
+
+                // Update nav item styles for both mobile and desktop
+                for (let i = 0; i < 4; i++) {
+                    const iconEl = document.getElementById(`step-${i + 1}-icon`);
+                    const headingEl = document.getElementById(`step-${i + 1}-heading`);
+                    const subtextEl = document.getElementById(`step-${i + 1}-subtext`);
+                    const mobileIconEl = document.getElementById(`step-${i + 1}-icon-mobile`);
+                    const mobileHeadingEl = document.getElementById(`step-${i + 1}-heading-mobile`);
+
+                    // Reset icon classes
+                    [iconEl, mobileIconEl].forEach(el => el.classList.remove('step-icon-active', 'step-icon-completed', 'step-icon-inactive'));
+                    
+                    // Reset text classes
+                    headingEl.classList.remove('step-heading-active', 'step-heading-inactive');
+                    subtextEl.classList.remove('step-subtext-active', 'step-subtext-inactive');
+                    mobileHeadingEl.classList.remove('step-heading-active', 'step-heading-inactive');
+
+                    if (i < stepIndex) {
+                        // Completed step
+                        [iconEl, mobileIconEl].forEach(el => el.classList.add('step-icon-completed'));
+                        [headingEl, mobileHeadingEl].forEach(el => el.classList.add('step-heading-active'));
+                        subtextEl.classList.add('step-subtext-active');
+                    } else if (i === stepIndex) {
+                        // Active step
+                        [iconEl, mobileIconEl].forEach(el => el.classList.add('step-icon-active'));
+                        [headingEl, mobileHeadingEl].forEach(el => el.classList.add('step-heading-active'));
+                         subtextEl.classList.add('step-subtext-active');
+                    } else {
+                        // Inactive step
+                        [iconEl, mobileIconEl].forEach(el => el.classList.add('step-icon-inactive'));
+                        [headingEl, mobileHeadingEl].forEach(el => el.classList.add('step-heading-inactive'));
+                        subtextEl.classList.add('step-subtext-inactive');
+                    }
+                }
+            }
+
+            // Tab functionality
+            function setupTabs(uploadTabId, pasteTabId, uploadPanelId, pastePanelId) {
+                const uploadTab = document.getElementById(uploadTabId);
+                const pasteTab = document.getElementById(pasteTabId);
+                const uploadPanel = document.getElementById(uploadPanelId);
+                const pastePanel = document.getElementById(pastePanelId);
+
+                uploadTab.addEventListener('click', () => {
+                    uploadPanel.classList.remove('hidden');
+                    pastePanel.classList.add('hidden');
+                    uploadTab.classList.replace('tab-inactive', 'tab-active');
+                    pasteTab.classList.replace('tab-active', 'tab-inactive');
+                });
+
+                pasteTab.addEventListener('click', () => {
+                    pastePanel.classList.remove('hidden');
+                    uploadPanel.classList.add('hidden');
+                    pasteTab.classList.replace('tab-inactive', 'tab-active');
+                    uploadTab.classList.replace('tab-active', 'tab-inactive');
+                });
+            }
+
+             // File Upload functionality
+            function setupFileUpload(fileInputId, dropzoneId, displayId, targetTextarea) {
+                const fileInput = document.getElementById(fileInputId);
+                const dropzone = document.getElementById(dropzoneId);
+                const display = document.getElementById(displayId);
+
+                const handleFiles = async (files) => {
+                    const file = files[0];
+                    if (!file) return;
+
+                    display.textContent = `Processing: ${file.name}...`;
+                    display.classList.remove('hidden');
+                    
+                    try {
+                        let textContent = '';
+                        const fileExtension = file.name.split('.').pop().toLowerCase();
+
+                        if (fileExtension === 'txt') {
+                            textContent = await file.text();
+                        } else if (fileExtension === 'pdf') {
+                            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+                            const data = await file.arrayBuffer();
+                            const pdf = await pdfjsLib.getDocument({data}).promise;
+                            const pageTexts = [];
+                            for (let i = 1; i <= pdf.numPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const textContent = await page.getTextContent();
+                                pageTexts.push(textContent.items.map(item => item.str).join(' '));
+                            }
+                            textContent = pageTexts.join('\n');
+                        } else if (fileExtension === 'doc' || fileExtension === 'docx') {
+                            const arrayBuffer = await file.arrayBuffer();
+                            const result = await mammoth.extractRawText({ arrayBuffer });
+                            textContent = result.value;
+                        } else {
+                           throw new Error('Unsupported file type. Please upload .txt, .pdf, .doc, or .docx');
+                        }
+
+                        targetTextarea.value = textContent;
+                        targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                        display.textContent = `File uploaded: ${file.name}`;
+
+                    } catch (error) {
+                        console.error('File processing error:', error);
+                        alert(error.message || 'There was an error processing your file.');
+                        display.textContent = `Failed to upload: ${file.name}`;
+                        targetTextarea.value = '';
+                        targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                };
+
+                fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+                dropzone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('bg-indigo-50'); });
+                dropzone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('bg-indigo-50'); });
+                dropzone.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('bg-indigo-50'); handleFiles(e.dataTransfer.files); });
+                dropzone.addEventListener('click', () => fileInput.click());
+            }
+
+            // Initial state
+            submitJdBtn.disabled = true;
+            startInterviewBtn.disabled = true;
+            
+            jdPasteTextarea.addEventListener('input', () => { jdTextarea.value = jdPasteTextarea.value; jdTextarea.dispatchEvent(new Event('input', { bubbles: true })); });
+            resumePasteTextarea.addEventListener('input', () => { resumeTextarea.value = resumePasteTextarea.value; resumeTextarea.dispatchEvent(new Event('input', { bubbles: true })); });
+
+            jdTextarea.addEventListener('input', () => { submitJdBtn.disabled = jdTextarea.value.trim() === ''; });
+            resumeTextarea.addEventListener('input', () => { startInterviewBtn.disabled = resumeTextarea.value.trim() === ''; });
+
+            submitJdBtn.addEventListener('click', () => navigateToStep(1));
+            startInterviewBtn.addEventListener('click', () => { navigateToStep(2); startInterviewProcess(); });
+            sendBtn.addEventListener('click', handleUserMessage);
+            chatInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleUserMessage(); });
+            endInterviewBtn.addEventListener('click', generateReport);
+            startAgainBtn.addEventListener('click', () => window.location.reload());
+            downloadReportPdfBtn.addEventListener('click', downloadReportPDF);
+
+            function addMessageToChat(text, sender) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('chat-bubble', sender === 'ai' ? 'chat-bubble-ai' : 'chat-bubble-user');
+                bubble.textContent = text;
+                chatWindow.appendChild(bubble);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+            
+            async function callGeminiAPI(prompt, options = {}) {
+                const { isJson = false, showLoader = true } = options;
+
+                if (showLoader) {
+                    loadingIndicator.classList.remove('hidden-section');
+                    sendBtn.disabled = true;
+                    chatInput.disabled = true;
+                }
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                if (isJson) payload.generationConfig = { responseMimeType: "application/json" };
+
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`API call failed with status: ${response.status}`);
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) return text;
+                    throw new Error("No content received from API.");
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    if (isJson) throw error; 
+                    return "Sorry, I encountered an error. Please try again.";
+                } finally {
+                    if (showLoader) {
+                        loadingIndicator.classList.add('hidden-section');
+                        sendBtn.disabled = false;
+                        chatInput.disabled = false;
+                        chatInput.focus();
+                    }
+                }
+            }
+
+            async function startInterviewProcess() {
+                try {
+                    const namePrompt = `From the following resume text, please extract the candidate's full name. Return only the full name and nothing else.\n\n---\n\n${resumeTextarea.value}`;
+                    const candidateName = await callGeminiAPI(namePrompt, { showLoader: false });
+                    candidateNameDisplay.textContent = `Hi, ${candidateName.trim()}`;
+                    candidateNameContainer.classList.remove('hidden');
+                } catch (error) {
+                    console.error("Failed to extract candidate name:", error);
+                    candidateNameDisplay.textContent = `Hi, Candidate`; // Fallback
+                    candidateNameContainer.classList.remove('hidden');
+                }
+                
+                const jd = jdTextarea.value;
+                const resume = resumeTextarea.value;
+                conversationHistory.push({ role: "user", parts: [{ text: `Job Description: ${jd}\n\nResume: ${resume}` }] });
+                const systemPrompt = `You are an expert interviewer. Conduct an interview based on the provided Job Description and Resume. 1. Start with a greeting and one opening question. 2. Ask only ONE question at a time. 3. Ask a mix of technical, behavioral, and resume-specific questions. 4. Keep it conversational. 5. After 4-5 questions, suggest ending the interview.`;
+                const firstPrompt = `${systemPrompt}\n\nJD: ${jd}\n\nRESUME: ${resume}\n\nPlease start the interview with your first question.`;
+                const firstQuestion = await callGeminiAPI(firstPrompt);
+                addMessageToChat(firstQuestion, 'ai');
+                conversationHistory.push({ role: "model", parts: [{ text: firstQuestion }] });
+                setTimeout(() => endInterviewBtn.classList.remove('hidden-section'), 3000);
+            }
+            
+            async function handleUserMessage() {
+                const userText = chatInput.value.trim();
+                if (!userText) return;
+
+                addMessageToChat(userText, 'user');
+                conversationHistory.push({ role: "user", parts: [{ text: userText }] });
+                chatInput.value = '';
+
+                let promptWithHistory = `You are an expert interviewer continuing a conversation. Ask the next relevant question based on the history. Ask only ONE question. Keep it conversational.\n---\nINTERVIEW HISTORY:\n`;
+                conversationHistory.forEach(turn => {
+                    promptWithHistory += `${turn.role === 'user' ? 'Candidate' : 'Interviewer'}: ${turn.parts[0].text}\n`;
+                });
+                promptWithHistory += `---\nInterviewer, what is your next question?`;
+                const nextQuestion = await callGeminiAPI(promptWithHistory);
+                addMessageToChat(nextQuestion, 'ai');
+                conversationHistory.push({ role: "model", parts: [{ text: nextQuestion }] });
+            }
+
+            async function generateReport() {
+                navigateToStep(3);
+                chatInputContainer.classList.add('hidden-section');
+                endInterviewBtn.classList.add('hidden-section');
+                reportLoading.classList.remove('hidden-section');
+                
+                let fullTranscript = "Interview Transcript:\n";
+                conversationHistory.slice(1).forEach(turn => {
+                    fullTranscript += `${turn.role === 'user' ? 'Candidate' : 'Interviewer'}: ${turn.parts[0].text}\n`;
+                });
+
+                const initialContext = `Job Description: ${jdTextarea.value}\n\nCandidate's Resume: ${resumeTextarea.value}`;
+                const reportPrompt = `You are an expert hiring manager. Analyze the interview transcript, job description, and resume. Provide a performance report as a JSON object. The JSON object MUST contain: 1. 'technicalScore': A number out of 70 for technical skills and relevance. 2. 'communicationScore': A number out of 30 for clarity and effectiveness. 3. 'briefSummary': A 2-3 sentence summary of overall performance. 4. 'detailedReport': An object with: - 'strengths': An array of strings. - 'areasForImprovement': An array of strings. - 'overallPerformance': A summary paragraph. Analyze this data: --- CONTEXT: ${initialContext} --- TRANSCRIPT: ${fullTranscript} --- Generate ONLY the JSON report.`;
+
+                try {
+                    const jsonText = await callGeminiAPI(reportPrompt, { isJson: true, showLoader: false });
+                    reportDataGlobal = JSON.parse(jsonText);
+                    reportLoading.classList.add('hidden-section');
+                    scoreSummarySection.classList.remove('hidden-section');
+                    downloadReportPdfBtn.classList.remove('hidden-section');
+
+                    const totalScore = (reportDataGlobal.technicalScore || 0) + (reportDataGlobal.communicationScore || 0);
+                    document.getElementById('total-score').textContent = totalScore;
+                    document.getElementById('technical-score').textContent = reportDataGlobal.technicalScore || 0;
+                    document.getElementById('communication-score').textContent = reportDataGlobal.communicationScore || 0;
+                    document.getElementById('brief-summary').textContent = reportDataGlobal.briefSummary;
+
+                    let detailedReportHTML = `<h3 class="text-xl font-bold text-slate-800 mb-2">Detailed Report</h3><h4 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Strengths</h4><ul class="list-disc pl-5 space-y-1 text-slate-600">${(reportDataGlobal.detailedReport.strengths || []).map(s => `<li>${s}</li>`).join('')}</ul><h4 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Areas for Improvement</h4><ul class="list-disc pl-5 space-y-1 text-slate-600">${(reportDataGlobal.detailedReport.areasForImprovement || []).map(s => `<li>${s}</li>`).join('')}</ul><h4 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Overall Performance Summary</h4><p class="text-slate-600">${reportDataGlobal.detailedReport.overallPerformance}</p>`;
+                    reportContent.innerHTML = detailedReportHTML;
+
+                    // Mark final step as complete for both navs
+                    document.getElementById('step-4-icon').classList.replace('step-icon-active', 'step-icon-completed');
+                    document.getElementById('step-4-icon-mobile').classList.replace('step-icon-active', 'step-icon-completed');
+                } catch (error) {
+                    console.error("Report Generation Error:", error);
+                    reportLoading.classList.add('hidden-section');
+                    reportContent.innerHTML = `<p class="text-red-500 text-center">Sorry, there was an error generating your report. Please try again.</p>`;
+                }
+            }
+            
+            async function downloadReportPDF() {
+                 const button = document.getElementById('download-report-pdf-btn');
+                button.textContent = 'Generating PDF...';
+                button.disabled = true;
+
+                if (!reportDataGlobal) {
+                    alert("Report data is not available yet.");
+                    button.textContent = 'Download Full Report (PDF)';
+                    button.disabled = false;
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const scoreElement = document.querySelector('.score-visual');
+
+                try {
+                    const canvas = await html2canvas(scoreElement, { scale: 2 });
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4' });
+                    const margin = 40;
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const usableWidth = pdfWidth - (2 * margin);
+                    const imgWidth = usableWidth;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+
+                    let y = margin + imgHeight + 30;
+
+                    const addTextSection = (title, content, titleSize, contentSize, isList = false) => {
+                        pdf.setFont(undefined, 'bold');
+                        pdf.setFontSize(titleSize);
+                         if (y + 20 > pdf.internal.pageSize.getHeight() - margin) {
+                            pdf.addPage();
+                            y = margin;
+                        }
+                        pdf.text(title, margin, y);
+                        y += titleSize + 5;
+                        pdf.setFont(undefined, 'normal');
+                        pdf.setFontSize(contentSize);
+
+                        if (isList) {
+                            content.forEach(item => {
+                                const lines = pdf.splitTextToSize(`• ${item}`, usableWidth - 10);
+                                if (y + (lines.length * (contentSize + 2)) > pdf.internal.pageSize.getHeight() - margin) {
+                                    pdf.addPage();
+                                    y = margin;
+                                }
+                                pdf.text(lines, margin + 10, y);
+                                y += (lines.length * (contentSize + 2)) + 5;
+                            });
+                        } else {
+                            const lines = pdf.splitTextToSize(content, usableWidth);
+                            if (y + (lines.length * (contentSize + 2)) > pdf.internal.pageSize.getHeight() - margin) {
+                                pdf.addPage();
+                                y = margin;
+                            }
+                            pdf.text(lines, margin, y);
+                            y += (lines.length * (contentSize + 2)) + 15;
+                        }
+                    };
+                    
+                    pdf.setFont('Helvetica', 'sans-serif');
+                    addTextSection('Brief Summary', reportDataGlobal.briefSummary, 16, 11);
+                    addTextSection('Strengths', reportDataGlobal.detailedReport.strengths, 14, 11, true);
+                    addTextSection('Areas for Improvement', reportDataGlobal.detailedReport.areasForImprovement, 14, 11, true);
+                    addTextSection('Overall Performance Summary', reportDataGlobal.detailedReport.overallPerformance, 14, 11);
+
+                    pdf.addPage();
+                    pdf.setFont('Helvetica', 'sans-serif');
+                    pdf.setFontSize(16);
+                    pdf.text("Interview Transcript", margin, margin);
+
+                    y = margin + 30;
+
+                    conversationHistory.slice(1).forEach(turn => {
+                        const speaker = turn.role === 'user' ? 'Candidate' : 'Interviewer';
+                        const text = turn.parts[0].text;
+                        pdf.setFontSize(12);
+                        pdf.setFont(undefined, 'bold');
+                        const speakerLines = pdf.splitTextToSize(`${speaker}:`, usableWidth);
+                        if (y + (speakerLines.length * 14) > pdf.internal.pageSize.getHeight() - margin) {
+                            pdf.addPage();
+                            y = margin;
+                        }
+                        pdf.text(speakerLines, margin, y);
+                        y += speakerLines.length * 14;
+                        pdf.setFont(undefined, 'normal');
+                        pdf.setFontSize(11);
+                        const textLines = pdf.splitTextToSize(text, usableWidth);
+                        if (y + (textLines.length * 12) + 10 > pdf.internal.pageSize.getHeight() - margin) {
+                            pdf.addPage();
+                            y = margin;
+                        }
+                        pdf.text(textLines, margin, y);
+                        y += (textLines.length * 12) + 24;
+                    });
+                    
+                    y += 10;
+                    pdf.setFont(undefined, 'italic');
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(128, 128, 128);
+                    const endMessage = "--- Candidate ended interview ---";
+                    if (y + 12 > pdf.internal.pageSize.getHeight() - margin) {
+                        pdf.addPage();
+                        y = margin;
+                    }
+                    pdf.text(endMessage, margin, y);
+                    pdf.save('interview_report.pdf');
+                } catch (error) {
+                    console.error("Failed to generate PDF:", error);
+                    alert("Sorry, there was an error creating the PDF file.");
+                } finally {
+                    button.textContent = 'Download Full Report (PDF)';
+                    button.disabled = false;
+                }
+            }
+            
+            setupTabs('jd-upload-tab', 'jd-paste-tab', 'jd-upload-panel', 'jd-paste-panel');
+            setupTabs('resume-upload-tab', 'resume-paste-tab', 'resume-upload-panel', 'resume-paste-panel');
+            setupFileUpload('jd-file-upload', 'jd-dropzone', 'jd-file-display', jdTextarea);
+            setupFileUpload('resume-file-upload', 'resume-dropzone', 'resume-file-display', resumeTextarea);
+            navigateToStep(0);
+        });
+    </script>
+</body>
+</html>
+
