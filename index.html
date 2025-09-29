@@ -178,7 +178,7 @@
                         <div id="jd-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md cursor-pointer hover:border-indigo-500 transition-colors">
                             <div class="space-y-1 text-center">
                                 <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                                <div class="flex text-sm text-slate-600"><label for="jd-file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"><span>Upload a file</span><input id="jd-file-upload" type="file" class="sr-only" accept=".txt,.pdf,.doc,.docx"></label><p class="pl-1">or drag and drop</p></div>
+                                <div class="flex text-sm text-slate-600"><span class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"><span>Upload a file</span><input id="jd-file-upload" type="file" class="sr-only" accept=".txt,.pdf,.doc,.docx"></span><p class="pl-1">or drag and drop</p></div>
                                 <p class="text-xs text-slate-500">TXT, PDF, DOC, DOCX up to 2MB</p>
                             </div>
                         </div>
@@ -208,7 +208,7 @@
                          <div id="resume-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md cursor-pointer hover:border-indigo-500 transition-colors">
                             <div class="space-y-1 text-center">
                                 <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                                <div class="flex text-sm text-slate-600"><label for="resume-file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"><span>Upload a file</span><input id="resume-file-upload" type="file" class="sr-only" accept=".txt,.pdf,.doc,.docx"></label><p class="pl-1">or drag and drop</p></div>
+                                <div class="flex text-sm text-slate-600"><span class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"><span>Upload a file</span><input id="resume-file-upload" type="file" class="sr-only" accept=".txt,.pdf,.doc,.docx"></span><p class="pl-1">or drag and drop</p></div>
                                 <p class="text-xs text-slate-500">TXT, PDF, DOC, DOCX up to 2MB</p>
                             </div>
                         </div>
@@ -229,8 +229,13 @@
                     <div id="chat-window" class="h-96 border border-slate-200 rounded-lg p-4 flex flex-col space-y-4 overflow-y-auto bg-slate-50">
                         <!-- Chat messages will be appended here -->
                     </div>
-                    <div id="chat-input-container" class="mt-4 flex space-x-2">
-                        <input type="text" id="chat-input" class="flex-1 w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="Type your answer...">
+                    <div id="chat-input-container" class="mt-4 flex space-x-2 items-center">
+                        <input type="text" id="chat-input" class="flex-1 w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="Type or say your answer...">
+                        <button id="mic-btn" class="p-3 text-slate-500 hover:text-indigo-600 transition-colors duration-200 rounded-full hover:bg-slate-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </button>
                         <button id="send-btn" class="bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition duration-200">Send</button>
                     </div>
                      <div id="loading-indicator" class="mt-4 text-center text-slate-500 hidden-section">
@@ -300,6 +305,7 @@
             const downloadReportPdfBtn = document.getElementById('download-report-pdf-btn');
             const candidateNameContainer = document.getElementById('candidate-name-container');
             const candidateNameDisplay = document.getElementById('candidate-name-display');
+            const micBtn = document.getElementById('mic-btn');
 
             const loadingIndicator = document.getElementById('loading-indicator');
             const reportLoading = document.getElementById('report-loading');
@@ -308,13 +314,16 @@
 
             let reportDataGlobal = null;
             let conversationHistory = [];
-            const apiKey = "";
-             // Leave empty, will be handled by the environment
+            const apiKey = "AIzaSyDwaM04UEdQ6RZVUwHq7nL91M6PXXd-C9A"; 
+            let questionCount = 0;
 
             function navigateToStep(stepIndex) {
                 // Hide/show main content sections
                 steps.forEach((stepId, index) => {
-                    document.getElementById(stepId).classList.toggle('hidden-section', index !== stepIndex);
+                    const stepEl = document.getElementById(stepId);
+                    if (stepEl) {
+                        stepEl.classList.toggle('hidden-section', index !== stepIndex);
+                    }
                 });
 
                 // Update nav item styles for both mobile and desktop
@@ -326,28 +335,42 @@
                     const mobileHeadingEl = document.getElementById(`step-${i + 1}-heading-mobile`);
 
                     // Reset icon classes
-                    [iconEl, mobileIconEl].forEach(el => el.classList.remove('step-icon-active', 'step-icon-completed', 'step-icon-inactive'));
+                    [iconEl, mobileIconEl].forEach(el => {
+                        if (el) el.classList.remove('step-icon-active', 'step-icon-completed', 'step-icon-inactive');
+                    });
                     
                     // Reset text classes
-                    headingEl.classList.remove('step-heading-active', 'step-heading-inactive');
-                    subtextEl.classList.remove('step-subtext-active', 'step-subtext-inactive');
-                    mobileHeadingEl.classList.remove('step-heading-active', 'step-heading-inactive');
+                    if(headingEl) headingEl.classList.remove('step-heading-active', 'step-heading-inactive');
+                    if(subtextEl) subtextEl.classList.remove('step-subtext-active', 'step-subtext-inactive');
+                    if(mobileHeadingEl) mobileHeadingEl.classList.remove('step-heading-active', 'step-heading-inactive');
 
                     if (i < stepIndex) {
                         // Completed step
-                        [iconEl, mobileIconEl].forEach(el => el.classList.add('step-icon-completed'));
-                        [headingEl, mobileHeadingEl].forEach(el => el.classList.add('step-heading-active'));
-                        subtextEl.classList.add('step-subtext-active');
+                        [iconEl, mobileIconEl].forEach(el => {
+                            if (el) el.classList.add('step-icon-completed');
+                        });
+                        [headingEl, mobileHeadingEl].forEach(el => {
+                            if (el) el.classList.add('step-heading-active');
+                        });
+                        if (subtextEl) subtextEl.classList.add('step-subtext-active');
                     } else if (i === stepIndex) {
                         // Active step
-                        [iconEl, mobileIconEl].forEach(el => el.classList.add('step-icon-active'));
-                        [headingEl, mobileHeadingEl].forEach(el => el.classList.add('step-heading-active'));
-                         subtextEl.classList.add('step-subtext-active');
+                        [iconEl, mobileIconEl].forEach(el => {
+                            if (el) el.classList.add('step-icon-active');
+                        });
+                        [headingEl, mobileHeadingEl].forEach(el => {
+                            if (el) el.classList.add('step-heading-active');
+                        });
+                         if (subtextEl) subtextEl.classList.add('step-subtext-active');
                     } else {
                         // Inactive step
-                        [iconEl, mobileIconEl].forEach(el => el.classList.add('step-icon-inactive'));
-                        [headingEl, mobileHeadingEl].forEach(el => el.classList.add('step-heading-inactive'));
-                        subtextEl.classList.add('step-subtext-inactive');
+                        [iconEl, mobileIconEl].forEach(el => {
+                            if (el) el.classList.add('step-icon-inactive');
+                        });
+                        [headingEl, mobileHeadingEl].forEach(el => {
+                            if (el) el.classList.add('step-heading-inactive');
+                        });
+                        if (subtextEl) subtextEl.classList.add('step-subtext-inactive');
                     }
                 }
             }
@@ -379,7 +402,7 @@
                 const fileInput = document.getElementById(fileInputId);
                 const dropzone = document.getElementById(dropzoneId);
                 const display = document.getElementById(displayId);
-
+                
                 const handleFiles = async (files) => {
                     const file = files[0];
                     if (!file) return;
@@ -449,6 +472,17 @@
             endInterviewBtn.addEventListener('click', generateReport);
             startAgainBtn.addEventListener('click', () => window.location.reload());
             downloadReportPdfBtn.addEventListener('click', downloadReportPDF);
+            
+            function speakText(text) {
+                if ('speechSynthesis' in window) {
+                    const cleanedText = text.replace(/`/g, '');
+                    const utterance = new SpeechSynthesisUtterance(cleanedText);
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    console.log('Text-to-speech not supported in this browser.');
+                }
+            }
+
 
             function addMessageToChat(text, sender) {
                 const bubble = document.createElement('div');
@@ -456,6 +490,9 @@
                 bubble.textContent = text;
                 chatWindow.appendChild(bubble);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
+                if (sender === 'ai') {
+                    speakText(text);
+                }
             }
             
             async function callGeminiAPI(prompt, options = {}) {
@@ -507,31 +544,111 @@
                 const jd = jdTextarea.value;
                 const resume = resumeTextarea.value;
                 conversationHistory.push({ role: "user", parts: [{ text: `Job Description: ${jd}\n\nResume: ${resume}` }] });
-                const systemPrompt = `You are an expert interviewer. Conduct an interview based on the provided Job Description and Resume. 1. Start with a greeting and one opening question. 2. Ask only ONE question at a time. 3. Ask a mix of technical, behavioral, and resume-specific questions. 4. Keep it conversational. 5. After 4-5 questions, suggest ending the interview.`;
+                const systemPrompt = `You are an expert technical interviewer. Your goal is to assess a candidate's technical fitness for a role based on their resume and a job description. 
+                1. Conduct a comprehensive technical interview consisting of exactly 3 questions.
+                2. All questions must be strictly technical and directly relevant to the skills mentioned in the job description and the candidate's resume.
+                3. Do not ask behavioral questions like "tell me about yourself" or "what are your weaknesses?".
+                4. Start with a brief greeting and then ask your first technical question.
+                5. Ask only ONE question at a time.
+                6. Vary the difficulty and topic of your questions to get a complete picture of the candidate's technical abilities.`;
                 const firstPrompt = `${systemPrompt}\n\nJD: ${jd}\n\nRESUME: ${resume}\n\nPlease start the interview with your first question.`;
                 const firstQuestion = await callGeminiAPI(firstPrompt);
                 addMessageToChat(firstQuestion, 'ai');
                 conversationHistory.push({ role: "model", parts: [{ text: firstQuestion }] });
-                setTimeout(() => endInterviewBtn.classList.remove('hidden-section'), 3000);
+                questionCount = 1;
             }
             
             async function handleUserMessage() {
+                if (isRecognizing) {
+                    recognition.stop();
+                }
+
                 const userText = chatInput.value.trim();
-                if (!userText) return;
+                
+                // Clear the input and transcript state immediately after capturing the text
+                chatInput.value = '';
+                final_transcript = '';
+
+                if (!userText) {
+                    return; // Don't send empty messages
+                }
 
                 addMessageToChat(userText, 'user');
                 conversationHistory.push({ role: "user", parts: [{ text: userText }] });
-                chatInput.value = '';
 
-                let promptWithHistory = `You are an expert interviewer continuing a conversation. Ask the next relevant question based on the history. Ask only ONE question. Keep it conversational.\n---\nINTERVIEW HISTORY:\n`;
+                if (questionCount >= 3) {
+                    const endMessage = "That concludes our technical interview. Thank you. I will now generate your performance report.";
+                    addMessageToChat(endMessage, 'ai');
+                    generateReport();
+                    return;
+                }
+
+                let promptWithHistory = `You are an expert technical interviewer continuing a conversation. You have asked ${questionCount} out of 3 total technical questions. Ask the next relevant technical question based on the history. Ask only ONE question. Do not ask behavioral questions.\n---\nINTERVIEW HISTORY:\n`;
                 conversationHistory.forEach(turn => {
                     promptWithHistory += `${turn.role === 'user' ? 'Candidate' : 'Interviewer'}: ${turn.parts[0].text}\n`;
                 });
-                promptWithHistory += `---\nInterviewer, what is your next question?`;
+                promptWithHistory += `---\nInterviewer, what is your next technical question?`;
                 const nextQuestion = await callGeminiAPI(promptWithHistory);
                 addMessageToChat(nextQuestion, 'ai');
                 conversationHistory.push({ role: "model", parts: [{ text: nextQuestion }] });
+                questionCount++;
             }
+            
+            // Speech Recognition Setup
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            let isRecognizing = false;
+            let final_transcript = '';
+
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.lang = 'en-US';
+                recognition.interimResults = true;
+
+                micBtn.addEventListener('click', () => {
+                    if (isRecognizing) {
+                        recognition.stop();
+                    } else {
+                        final_transcript = chatInput.value ? chatInput.value + ' ' : '';
+                        recognition.start();
+                    }
+                });
+                
+                recognition.onstart = () => {
+                    isRecognizing = true;
+                    micBtn.classList.add('text-red-500');
+                };
+
+                recognition.onresult = (event) => {
+                    let interim_transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            final_transcript += event.results[i][0].transcript + ' ';
+                        } else {
+                            interim_transcript += event.results[i][0].transcript;
+                        }
+                    }
+                    chatInput.value = final_transcript + interim_transcript;
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                     if (event.error === 'not-allowed') {
+                        alert('Microphone access was denied. Please allow microphone access in your browser settings to use this feature.');
+                    }
+                };
+
+                recognition.onend = () => {
+                    isRecognizing = false;
+                    micBtn.classList.remove('text-red-500');
+                };
+
+            } else {
+                console.log('Speech Recognition not supported in this browser.');
+                micBtn.style.display = 'none'; // Hide the button if not supported
+            }
+
 
             async function generateReport() {
                 navigateToStep(3);
@@ -599,7 +716,7 @@
                     const imgHeight = (canvas.height * imgWidth) / canvas.width;
                     pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
 
-                    let y = margin + imgHeight + 30;
+                    let y = margin + imgHeight + 50; // Increased spacing
 
                     const addTextSection = (title, content, titleSize, contentSize, isList = false) => {
                         pdf.setFont(undefined, 'bold');
@@ -699,5 +816,4 @@
     </script>
 </body>
 </html>
-
 
